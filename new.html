@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>클리어!</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div id="hkey">
+	<p>아무 키나 눌러주세요!<br>Press any key to continue</p>
+</div>
+	<audio src="home.mp3" id="myHome" loop></audio>
+	<h2>my sweet home~</h2>
+	<p class="new-p">무사히 집에 도착했어요!<br>도와주셔서 감사합니다 *^^*</p>
+	<div class="return">
+		<a href='index.html'>돌아가기</a>
+		</div>
+	<img src="img/home1.png" class="bghome">
+	<img src="img/home1.png" class="bgh2">
+	
+	<script>
+    document.addEventListener('keydown', function() {
+      const myHome = document.getElementById('myHome');
+      document.getElementById('hkey').style.display = 'none';
+      myHome.play().catch(function(error) {
+        console.log('소리 재생 중 오류 발생: ' + error);
+      });
+    });
+  </script>
+</body>
+</html>

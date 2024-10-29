@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>떡 하나 주면 안 잡아먹지</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <h1>떡 하나 주면 안 잡아먹지</h1>
+  <div id="display"></div>
+  <div id="gameBoard"></div>
+  <p>방향키로 움직여주세요!</p>
+
+<div>
+  <img src="img/union1.png" class="union1">
+  <p class="union1p">방향키로 움직여서 오른쪽 아래 <br><span class="highlight">‘MY HOME!’</span>에 도착하면 성공이에요!</p>
+</div>
+
+<div>
+  <img src="img/union2.png" class="union2">
+  <p class="union2p">가는 길에 호랑이를 만나면 <span class="t-blue">떡을 만들어줘야 해요.</span></p>
+</div>
+
+<div>
+  <img src="img/union3.png" class="union3">
+  <p class="union3p">떡을 만들지 못하면 호랑이에게 잡아먹혀서 <span class="t-red">다시 출발</span>해야 한답니다 T.T</p>
+</div>
+
+  <div id="popup">
+    <div id="popup-content">
+      <h3>어흥! 떡 하나 주면 안 잡아먹지</h3>
+      <p>시루떡을 만들자<br>마우스를 움직여 <span class="t-blue">필요한 재료를 5개 받으면 성공!</span> <span class="t-red">다른 재료가 3개 들어가면 실패</span>예요<br><br><span class="highlight">필요한 재료</span></p>
+      <div class="pop-img1">
+        <div class="pop-bg">
+          <img src="img/powder2.png" class="pop-img">
+        </div>
+        <div class="pop-bg">
+          <img src="img/water.png" class="pop-img">
+        </div>
+        <div class="pop-bg">
+          <img src="img/redbean.png" class="pop-img">
+        </div>
+      </div>
+      <canvas id="gameCanvas"></canvas>
+    </div>
+  </div>
+
+  <div id="youWin">
+    <h3>시루떡을 완성했다!</h3>
+    <img src="img/win2.png" class="siru">
+    <button id="close-popup">다음으로</button>
+  </div>
+
+  <div id="youLose">
+    <h3>이런... 호랑이에게 잡아먹히고 말았어요 T.T</h3>
+    <img src="img/tiger2.png" class="tiger2">
+    <button id="restart">다시 시작</button>
+  </div>
+
+<audio id="tgSound" src="tiger.wav" preload="auto"></audio>
+<audio id="siruSound" src="complete.mp3" preload="auto"></audio>
+
+  <script>
+    let myName = prompt("당신의 이름은?", "해님달");
+    let text = "안녕하세요, " + myName + "님!<br>제가 무사히 집에 갈 수 있게 도와주시겠어요?";
+    document.getElementById('display').innerHTML = text;
+
+    const maze = [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 1, 1, 1, 1, 0, 1],
+      [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 1, 1, 1, 0, 1, 0, 0, 1],
+      [1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
+      [1, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+      [1, 1, 0, 0, 1, 0, 1, 1, 1, 1],
+      [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1, 1, 1, 0, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
+
+    const player = { x: 1, y: 1 };
+    const goal = { x: 8, y: 8 };
+    const tigers = [
+      { x: 5, y: 2 }, 
+      { x: 2, y: 6 }, 
+      { x: 8, y: 5 },
+      { x: 1, y: 8 }
+    ];
+
+    const gameBoard = document.getElementById('gameBoard');
+    let previousPosition = { x: player.x, y: player.y };
+
+    function drawMaze() {
+      gameBoard.innerHTML = ''; 
+      for (let y = 0; y < maze.length; y++) {
+        for (let x = 0; x < maze[y].length; x++) { 
+          const tile = document.createElement('div');
+          tile.classList.add('tile');
+          if (maze[y][x] === 1) {
+            tile.classList.add('wall');
+          } else if (x === player.x && y === player.y) {
+            tile.classList.add('player');
+          } else if (x === goal.x && y === goal.y) {
+            tile.classList.add('home');
+            tile.textContent = 'MY HOME!';
+          } else if (isTigerHere(x, y)) {
+            tile.classList.add('tiger');
+          } else {
+            tile.classList.add('path');
+          }
+          gameBoard.appendChild(tile);
+        }
+      }
+    }
+
+    function movePlayer(dx, dy) {
+      const newX = player.x + dx;
+      const newY = player.y + dy;
+      if (maze[newY][newX] === 0) {
+        player.x = newX;
+        player.y = newY;
+        drawMaze();
+        checkWin();
+        checkTiger();
+      }
+    }
+
+    function checkTiger() {
+      if (tigers.some(tiger => tiger.x === player.x && tiger.y === player.y)) {
+        previousPosition = { x: player.x, y: player.y };
+        document.getElementById('popup').style.display = 'flex';
+        startFallingObjects();
+        alert("앗! 호랑이다!");
+        draw();
+      }
+    }
+
+    document.getElementById('close-popup').addEventListener('click', function() {
+      document.getElementById('popup').style.display = 'none';
+      player.x = previousPosition.x;
+      player.y = previousPosition.y;
+      drawMaze();
+    });
+
+    function isTigerHere(x, y) {
+      return tigers.some(tiger => tiger.x === x && tiger.y === y);
+    }
+
+    function checkWin() {
+      if (player.x === goal.x && player.y === goal.y) {
+        alert('우와! 집이다!');
+        window.location.href = 'new.html';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp':
+          movePlayer(0, -1);
+          break;
+        case 'ArrowDown':
+          movePlayer(0, 1);
+          break;
+        case 'ArrowLeft':
+          movePlayer(-1, 0);
+          break;
+        case 'ArrowRight':
+          movePlayer(1, 0);
+          break;
+      }
+    });
+
+    drawMaze();
+
+    // 미니게임 로직 추가
+    let trueCount = 0;
+    let falseCount = 0;
+    const maxTrue = 5;
+    const maxFalse = 3;
+    let gameActive = true;
+
+    // false 아이템 목록 (랜덤으로 선택)
+    const falseItems = [
+      'img/banana.png', 'img/biscuit.png', 'img/chocolate.png',
+      'img/milk.png',
+      'img/powder1.png', 'img/strberry.png', 'img/watermelon.png'
+    ];
+
+    // 기본 true 아이템 목록
+    const trueItems = [
+      'img/powder2.png', 'img/water.png', 'img/redbean.png'
+    ];
+
+    // 게임 캔버스와 컨텍스트
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let paddleWidth = 100;
+    let paddleHeight = 25;
+    let paddleX = (canvas.width - paddleWidth) / 2;
+
+  const paddleImage = new Image();
+  paddleImage.src = 'img/basket.png';
+
+  let items = [];
+
+
+    // 패들 그리기
+    function drawPaddle() {
+      ctx.drawImage(paddleImage, paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    }
+
+    // 아이템 생성 함수
+    function createFallingItem(isTrue) {
+      let item = {
+        x: Math.random() * (canvas.width - 50), // 랜덤한 X 좌표에서 생성
+        y: 0,
+        width: 40,
+        height: 30,
+        isTrue: isTrue, // true 또는 false 아이템 구분
+        image: new Image(),
+        speed: 0.5 + Math.random() * 0.5 // 속도
+      };
+
+      if (isTrue) {
+        const randomTrueItem = trueItems[Math.floor(Math.random() * trueItems.length)];
+        item.image.src = randomTrueItem;
+      } else {
+        const randomFalseItem = falseItems[Math.floor(Math.random() * falseItems.length)];
+        item.image.src = randomFalseItem;
+      }
+
+      items.push(item);
+    }
+
+    // 아이템 그리기 및 충돌 감지
+    function drawItems() {
+      items.forEach((item, index) => {
+        ctx.drawImage(item.image, item.x, item.y, item.width, item.height);
+
+        // 아이템이 아래로 떨어지게 설정
+        item.y += item.speed;
+
+        // 충돌 감지
+        if (item.y + item.height >= canvas.height - paddleHeight && item.x > paddleX && item.x < paddleX + paddleWidth) {
+          if (item.isTrue) {
+            trueCount++;
+          } else {
+            falseCount++;
+          }
+
+          // 충돌한 아이템은 리스트에서 제거
+          items.splice(index, 1);
+
+          // 게임 승리 또는 패배 조건 확인
+          if (trueCount >= maxTrue) {
+            gameActive = false;
+            showSuccessPopup(); playSiruSound(); // 성공 팝업 표시
+          } else if (falseCount >= maxFalse) {
+            gameActive = false;
+            showFailPopup(); playTigerSound(); // 실패 팝업 
+          }
+        }
+
+        // 아이템이 화면 아래로 넘어가면 제거
+        if (item.y > canvas.height) {
+          items.splice(index, 1);
+        }
+      });
+    }
+
+    // 마우스 이동에 따른 패들 움직임
+    canvas.addEventListener("mousemove", function (e) {
+      const relativeX = e.clientX - canvas.offsetLeft;
+      if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+      }
+    });
+
+    // 게임 루프
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // 화면 지우기
+
+      if (gameActive) {
+        drawPaddle(); // 패들 그리기
+        drawItems();  // 아이템 그리기 및 충돌 감지
+        requestAnimationFrame(draw); // 애니메이션을 계속 호출
+      }
+    }
+
+    // 일정 시간마다 아이템 생성
+    function startFallingObjects() {
+      if (gameActive) {
+        const isTrue = Math.random() < 0.5; // true/false 아이템 랜덤 결정
+        createFallingItem(isTrue);
+        setTimeout(startFallingObjects, 500); // 1초마다 아이템 생성
+      }
+    }
+
+    // 게임 초기화 (리셋)
+function resetGame() {
+  trueCount = 0;
+  falseCount = 0;
+  items = [];
+  gameActive = true; // 게임이 활성화 상태인지 확인
+  document.getElementById("youWin").style.display = "none"; // 팝업 초기화
+  document.getElementById("youLose").style.display = "none"; // 팝업 초기화
+  document.getElementById("popup").style.display = "none"; // 팝업 초기화
+}
+
+    // 성공 팝업 표시
+    function showSuccessPopup() {
+      document.getElementById("youWin").style.display = "block";
+    }
+
+function playTigerSound() {
+      var audio = document.getElementById("tgSound");
+      audio.currentTime = 0;audio.play();}
+function playSiruSound() {
+      var audio = document.getElementById("siruSound");
+      audio.currentTime = 0;audio.play();}
+
+    // 실패 팝업 표시
+    function showFailPopup() {
+      document.getElementById("youLose").style.display = "block";
+    }
+
+    // 실패시 새로고침
+    document.getElementById("restart").addEventListener("click", function () {
+      location.reload(true); // 화면 새로고침
+    });
+
+
+    // 팝업 닫기
+    document.getElementById("close-popup").addEventListener("click", function () {
+      document.getElementById("popup").style.display = "none";
+      document.getElementById("youWin").style.display = "none";
+      resetGame(); // 게임 리셋
+    });
+
+    // 게임 시작
+    resetGame();
+
+  </script>
+</body>
+</html>

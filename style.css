@@ -1,0 +1,152 @@
+body {display: flex;
+    	justify-content: center;align-items: center;
+    	margin: 0;padding: 0;flex-direction: column;
+    	background-color: white;
+    	font-family: 'NeoDunggeunmoPro-Regular';}
+h1,h2,h3,h4,p,div{margin: 0;padding: 0;}
+/*new페이지 스타일*/
+    h2{padding: 14vw 0vw 5vw 0vw;
+        font-size: 7vw;color: white;
+        text-shadow: 0.3vw 0.3vw 0vw black;}
+        .new-p{color: white;padding-bottom: 8vw;font-size: 1.5vw;
+            line-height: 2.5vw;text-align: center;
+            text-shadow: 0.2vw 0.2vw 0vw black;}
+    #hkey{width: 100vw;height: 100vh; background: black;color: white;
+        animation: hkey 1s infinite linear;text-align: center;align-content: center;
+        z-index: 1000;position: fixed;top: 0vw;left: 0vw;}
+    @keyframes hkey {to{color: black;}}
+
+    .return{width: 8vw;height: 3vw;text-align: center;
+        align-content: center;border: 1px solid white;
+        border-radius: 1vw;color: white;}
+        .return:hover{color: black;background: white;}
+    a{text-decoration: none;font-size: 1.5vw;
+        color: white; padding: 1vw;}
+        a:hover{color: black;}
+    .bghome,.bgh2{width: 100vw;height: 100vh;z-index: -10;
+            position: absolute;left: 0vw;top: 0vw;}
+    .bgh2{animation: bgh 1s alternate infinite; infinite;
+        mix-blend-mode: color-burn;}
+        @keyframes bgh{from{opacity: 50%;} to{opacity: 0%;}}
+
+    @font-face {font-family: 'NeoDunggeunmoPro-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/NeoDunggeunmoPro-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;}
+
+h1{padding-top: 2vw;font-size: 3vw;
+text-shadow: 0.2vw 0.2vw 0vw lightgreen;}
+h3{padding-top: 1.5vw;font-size: 2.5vw;}
+p,#display{padding: 1vw;font-size: 1.2vw;
+        line-height: 1.6vw;}
+
+	#gameBoard {display: grid;
+		grid-template-columns: repeat(10, 4vw);
+		grid-template-rows: repeat(10, 4vw);
+		gap: 0vw;}
+	.tile {width: 4vw;height: 4vw;
+		display: flex;
+		justify-content: center;align-items: center;
+		font-size: 20px;}
+    .wall {background-color: lightgreen;}
+    .path {background-color: white;}
+    .player {background-color: black;
+    	border-radius: 50%;
+    	width: 4vw;height: 4vw;
+    	justify-content: center;align-items: center;}
+    .home {background: #00FF37;
+    	color: black;font-size: 1.3vw;
+    	justify-content: center;text-align: center;
+    	animation: hmrot 1s infinite;}
+    	@keyframes hmrot {to{rotate: 360deg;
+    		background: black;color: white;}}
+    .tiger {background-image: url('tiger.png');
+    	background-size: cover;background-position: center;display: flex;
+        animation: tirot 0.5s infinite ease-in-out alternate;
+    	justify-content: center;align-items: center;}
+    	@keyframes tirot {from{rotate: -10deg}
+    		to{rotate: 10deg;}}
+    #display{text-align: center;}
+
+    .highlight{display: inline;
+        box-shadow: inset 0 -2vw 0 lightgreen;}
+    .t-red{display: inline;color: red;}
+    .t-blue{display: inline;color: blue;}
+
+
+    canvas { width: 55vw;height: 35vw;
+      background: linear-gradient(lightgreen, rgba(255, 255, 0, 0.3));
+      display: block;margin: 0 auto;}
+
+      .tiger2, .siru{display:block;width: 30vw;height: auto;
+        padding: 3vw;margin: auto;}
+      button{appearance: none;background: white;
+        box-shadow: 0.2vw 0.2vw 0 black;border: 1px solid black;
+        padding: 0.5vw 1vw;display: block;margin: auto;
+        color: black;font-size: 2vw;border-radius: 0.5vw;
+        font-family: 'NeoDunggeunmoPro-Regular';}
+    button:hover{background:black;color: white;
+        box-shadow: 0.2vw 0.2vw 0 white;border: 1px solid lightgray;}
+
+    #popup {
+      position: fixed;top: 0;left: 0;
+      width: 100%;height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);display: none;
+      justify-content: center;align-items: center;}
+    #popup-content {background-color: white;padding: 1.5vw;
+        border-radius: 1vw;text-align: center;}
+
+        .pop-img1{align-items: center;
+            align-content: center;padding-bottom: 1vw;}
+        .pop-img{width: 3.5vw;height: auto;}
+        .pop-bg{background: lightgreen;
+            align-items: center;align-content: center;
+            display: inline-block;
+            border-radius: 100%;width: 5vw;height: 5vw;}
+
+/* 팝업 성공 및 실패 메시지 */
+#youWin, #youLose {
+  display: none;position: absolute;
+  width: 80vw;height: 50vw;
+  top: 50%;left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 1vw;text-align: center;
+  align-content: center;align-items: center;
+  box-shadow: 0.5vw 0.5vw 0 black;border: 2px solid black;
+}
+
+#youLose {
+  background-color: red;
+}
+
+
+.union1{width: 23vw;height: auto;position: absolute;
+    top: 11vw;left: 10vw;opacity: 0;
+    animation: un1 8s infinite;}
+.union1p{width: 22vw;position: absolute;opacity: 0;
+    top: 12vw;left: 10.5vw;
+    animation: un1 8s infinite;}
+    @keyframes un1{7%{opacity: 0;}
+    31%{opacity: 1;}
+    38%{opacity: 0;}}
+
+.union2{width: 22vw;height: auto;position: absolute;
+    top: 26vw;right: 9.5vw;opacity: 0;
+    animation: un2 8s infinite;}
+.union2p{width: 18vw;position: absolute;opacity: 0;
+    top: 27.3vw;right: 9.2vw;
+    animation: un2 8s infinite;}
+    @keyframes un2{38%{opacity: 0;}
+    62%{opacity: 1;}
+    69%{opacity: 0;}}
+
+.union3{width: 24vw;height: auto;position: absolute;
+    top: 30vw;right: 8.5vw;opacity: 0;
+    animation: un3 8s infinite;}
+.union3p{width: 20vw;position: absolute;opacity: 0;
+    top: 31vw;right: 8.5vw;
+    animation: un3 8s infinite;}
+    @keyframes un3{69%{opacity: 0;}
+    94%{opacity: 1;}
+    100%{opacity: 0;}}
